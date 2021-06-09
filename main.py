@@ -6,7 +6,7 @@ from forms.search import SearchForm
 from forms.registration import RegisterForm, LoginForm
 from flask import Flask, render_template, redirect, request, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from sort import sort_func
 
 app = Flask(__name__)
@@ -33,11 +33,16 @@ def logout():
 def system():
     form = SearchForm()
     db_sess = db_session.create_session()
-    offers = db_sess.query(Offer).all()[:10]
+    if current_user.is_authenticated:
+        offers = db_sess.query(Offer).filter(current_user.id != Offer.user_id).all()[:10]
+    else:
+        offers = db_sess.query(Offer).all()[:10]
 
     if request.method == "POST":
-        offers = db_sess.query(Offer).filter(or_(Offer.name.like(f'%{form.searching}%'))).all()
         if current_user.is_authenticated:
+            offers = db_sess.query(Offer).filter(
+                and_(or_(Offer.name.like(f'%{form.searching}%'), Offer.description.like(f'%{form.searching}%')),
+                     current_user.id != Offer.user_id)).all()
             if form.sorting == 'По расстоянию':
                 offers.sort(key=lambda offer: offer.price)
                 first, second, third = sort_func(current_user.nation)
@@ -69,10 +74,9 @@ def system():
                 offers = first_array + second_array + third_array
                 offers.sort(key=lambda offer: offer.price)
         else:
+            offers = db_sess.query(Offer).filter(or_(Offer.name.like(f'%{form.searching}%'))).all()
             offers.sort(key=lambda offer: offer.price)
 
-    if current_user.is_authenticated:
-        offers = db_sess.query(Offer).filter(current_user.id != Offer.user_id).all()[:10]
     nations = list()
     for offer in offers:
         nations.append(db_sess.query(User).filter(offer.user_id == User.id).first().nation)
