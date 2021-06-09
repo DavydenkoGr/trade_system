@@ -35,8 +35,13 @@ def system():
     if request.method == "GET":
         pass
     db_sess = db_session.create_session()
-    offers = db_sess.query(Offer).all()[:5]
-    return render_template("system.html", n=max(0, len(offers)), offers=offers, form=form)
+    offers = db_sess.query(Offer).all()[:10]
+    if current_user.is_authenticated:
+        offers = db_sess.query(Offer).filter(current_user.id != Offer.user_id).all()[:10]
+    nations = list()
+    for offer in offers:
+        nations.append(db_sess.query(User).filter(offer.user_id == User.id).first().nation)
+    return render_template("system.html", n=max(0, len(offers)), offers=offers, nations=nations, form=form)
 
 
 @app.route("/account")
@@ -108,7 +113,8 @@ def add_offer():
             name=form.name.data,
             description=form.description.data,
             price=form.price.data,
-            image=f"static/img/{str(n + 1)}.png"
+            image=f"static/img/{str(n + 1)}.png",
+            user_id=current_user.id
         )
         db_sess.add(offer)
         db_sess.commit()
@@ -124,8 +130,9 @@ def buy_offer(id):
     if request.method == 'POST':
         if not current_user.money >= offer.price:
             return render_template('offer_card.html', offer=offer)
-        current_user.money -= offer.price
+        c_u = db_sess.query(User).filter(User.id == current_user.id).first()
         user = db_sess.query(User).filter(User.id == offer.user_id).first()
+        c_u.money -= offer.price
         user.money += offer.price
         db_sess.delete(offer)
         db_sess.commit()
