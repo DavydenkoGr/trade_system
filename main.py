@@ -6,8 +6,8 @@ from forms.search import SearchForm
 from forms.registration import RegisterForm, LoginForm
 from flask import Flask, render_template, redirect, request, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-
-
+from sqlalchemy import or_
+from sort import sort_func
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'DK_secret_key'
@@ -32,10 +32,45 @@ def logout():
 @app.route("/", methods=['GET', 'POST'])
 def system():
     form = SearchForm()
-    if request.method == "GET":
-        pass
     db_sess = db_session.create_session()
     offers = db_sess.query(Offer).all()[:10]
+
+    if request.method == "POST":
+        offers = db_sess.query(Offer).filter(or_(Offer.name.like(f'%{form.searching}%'))).all()
+        if current_user.is_authenticated:
+            if form.sorting == 'По расстоянию':
+                offers.sort(key=lambda offer: offer.price)
+                first, second, third = sort_func(current_user.nation)
+                first_array = []
+                second_array = []
+                third_array = []
+                for i in range(len(offers)):
+                    user = db_sess.query(User).filter(User.id == offers.user_id).first()
+                    if user.nation == first:
+                        first_array.append(offers[i])
+                    elif user.nation == second:
+                        second_array.append(offers[i])
+                    elif user.nation == third:
+                        third_array.append(offers[i])
+                offers = first_array + second_array + third_array
+            else:
+                first, second, third = sort_func(current_user.nation)
+                first_array = []
+                second_array = []
+                third_array = []
+                for i in range(len(offers)):
+                    user = db_sess.query(User).filter(User.id == offers.user_id).first()
+                    if user.nation == first:
+                        first_array.append(offers[i])
+                    elif user.nation == second:
+                        second_array.append(offers[i])
+                    elif user.nation == third:
+                        third_array.append(offers[i])
+                offers = first_array + second_array + third_array
+                offers.sort(key=lambda offer: offer.price)
+        else:
+            offers.sort(key=lambda offer: offer.price)
+
     if current_user.is_authenticated:
         offers = db_sess.query(Offer).filter(current_user.id != Offer.user_id).all()[:10]
     nations = list()
@@ -121,6 +156,7 @@ def add_offer():
         return redirect('/account')
 
     return render_template("add_offer.html", form=form)
+
 
 @app.route('/buy_offer/<int:id>', methods=['GET', 'POST'])
 @login_required
