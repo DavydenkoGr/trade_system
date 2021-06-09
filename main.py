@@ -31,7 +31,7 @@ def logout():
     return redirect("/")
 
 
-@app.route("/system")
+@app.route("/system", methods=['GET', 'POST'])
 @app.route("/", methods=['GET', 'POST'])
 def system():
     form = SearchForm()
