@@ -13,7 +13,7 @@ class RegisterForm(FlaskForm):
     nation = SelectField('Агломерация', validators=[DataRequired()], choices=['Сернистая Пустыня',
                                                                               'Огненный Океан',
                                                                               'Глубокий Каньон'])
-    image = FileField('Фотография товара', validators=[DataRequired()])
+    image = FileField('Ваше фото', validators=[DataRequired()])
     submit = SubmitField('Зарегистрироваться')
 
 
