@@ -14,8 +14,8 @@
         <section class="">
             <div class="row align-items-center"  style="margin-top: 50px;">
                 <div class="col">
-                    <img src="{{ offers[i].image }}"
-                         alt="" style="width: 100%; border-radius: 100%;">
+                    <img src="{{ url_for('static', filename=offers[i].image) }}"
+                         alt="" style="width: 100%; border-radius: 20px;">
                 </div>
                     <div class="col" style="text-align: center">
                         <h3>{{ offers[i].name }}</h3>
@@ -23,7 +23,7 @@
                         <h5>{{ offers[i].description }}</h5>
                     </div>
                 <div class="col" style="text-align: center">
-                    <a href="/buy_offer/{{ offers[i].id }}" class="btn_to_card">{{ offers[i].price }}</a>
+                    <a href="/buy_offer/{{ offers[i].id }}" class="btn_to_card btn btn-outline-secondary">{{ offers[i].price }}</a>
                 </div>
             </div>
         </section>

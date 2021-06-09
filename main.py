@@ -62,7 +62,22 @@ def system():
                     elif user.nation == third:
                         third_array.append(offers[i])
                 offers = first_array + second_array + third_array
-            else:
+            elif form.sorting.data == 'По цене сначала меньше':
+                first, second, third = sort_func(current_user.nation)
+                first_array = []
+                second_array = []
+                third_array = []
+                for i in range(len(offers)):
+                    user = db_sess.query(User).filter(User.id == offers[i].user_id).first()
+                    if user.nation == first:
+                        first_array.append(offers[i])
+                    elif user.nation == second:
+                        second_array.append(offers[i])
+                    elif user.nation == third:
+                        third_array.append(offers[i])
+                offers = first_array + second_array + third_array
+                offers.sort(key=lambda offer: offer.price, reverse=False)
+            elif form.sorting.data == 'По цене сначала больше':
                 first, second, third = sort_func(current_user.nation)
                 first_array = []
                 second_array = []
@@ -156,7 +171,7 @@ def add_offer():
             name=form.name.data,
             description=form.description.data,
             price=form.price.data,
-            image=f"static/img/{str(n + 1)}.png",
+            image=f"/img/{str(n + 1)}.png",
             user_id=current_user.id
         )
         db_sess.add(offer)
@@ -189,9 +204,9 @@ def main():
     # db_sess = db_session.create_session()
     # db_sess.commit()
     db_session.global_init("db/trade_system.db")
-    # app.run(host='127.0.0.1', port=8000, debug=True)
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='127.0.0.1', port=8000, debug=True)
+    # port = int(os.environ.get("PORT", 5000))
+    # app.run(host='0.0.0.0', port=port)
 
 
 if __name__ == '__main__':

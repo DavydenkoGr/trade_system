@@ -5,7 +5,7 @@
     <div class="inner">
         <div class="left-2">
             <h2>{{ offer.name }}</h2>
-            <img src="{{ offer.image }}" alt="">
+            <img src="{{ url_for('static', filename=offer.image) }}" alt="Здесь должна быть картинка">
         </div>
         <div class="right-2">
             <form>
