@@ -8,6 +8,7 @@ from flask import Flask, render_template, redirect, request, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from sqlalchemy import or_, and_
 from sort import sort_func
+import os
 
 from waitress import serve
 
@@ -189,7 +190,8 @@ def main():
     # db_sess.commit()
     db_session.global_init("db/trade_system.db")
     # app.run(host='127.0.0.1', port=8000, debug=True)
-    serve(app, host='0.0.0.0', port='5000')
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
 
 
 if __name__ == '__main__':
