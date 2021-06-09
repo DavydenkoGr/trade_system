@@ -39,18 +39,19 @@ def system():
         offers = db_sess.query(Offer).all()[:10]
 
     if request.method == "POST":
+        print(form.searching.data)
         if current_user.is_authenticated:
             offers = db_sess.query(Offer).filter(
-                and_(or_(Offer.name.like(f'%{form.searching}%'), Offer.description.like(f'%{form.searching}%')),
+                and_(or_(Offer.name.like(f'%{form.searching.data}%'), Offer.description.like(f'%{form.searching.data}%')),
                      current_user.id != Offer.user_id)).all()
-            if form.sorting == 'По расстоянию':
-                offers.sort(key=lambda offer: offer.price)
+            if form.sorting.data == 'По расстоянию':
+                offers.sort(key=lambda offer: offer.price, reverse=True)
                 first, second, third = sort_func(current_user.nation)
                 first_array = []
                 second_array = []
                 third_array = []
                 for i in range(len(offers)):
-                    user = db_sess.query(User).filter(User.id == offers.user_id).first()
+                    user = db_sess.query(User).filter(User.id == offers[i].user_id).first()
                     if user.nation == first:
                         first_array.append(offers[i])
                     elif user.nation == second:
@@ -64,7 +65,7 @@ def system():
                 second_array = []
                 third_array = []
                 for i in range(len(offers)):
-                    user = db_sess.query(User).filter(User.id == offers.user_id).first()
+                    user = db_sess.query(User).filter(User.id == offers[i].user_id).first()
                     if user.nation == first:
                         first_array.append(offers[i])
                     elif user.nation == second:
@@ -72,9 +73,9 @@ def system():
                     elif user.nation == third:
                         third_array.append(offers[i])
                 offers = first_array + second_array + third_array
-                offers.sort(key=lambda offer: offer.price)
+                offers.sort(key=lambda offer: offer.price, reverse=True)
         else:
-            offers = db_sess.query(Offer).filter(or_(Offer.name.like(f'%{form.searching}%'))).all()
+            offers = db_sess.query(Offer).filter(or_(Offer.name.like(f'%{form.searching.data}%'))).all()
             offers.sort(key=lambda offer: offer.price)
 
     nations = list()
