@@ -9,6 +9,8 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from sqlalchemy import or_, and_
 from sort import sort_func
 
+from waitress import serve
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'DK_secret_key'
 login_manager = LoginManager()
@@ -186,7 +188,8 @@ def main():
     # db_sess = db_session.create_session()
     # db_sess.commit()
     db_session.global_init("db/trade_system.db")
-    app.run(host='127.0.0.1', port=8000, debug=True)
+    # app.run(host='127.0.0.1', port=8000, debug=True)
+    serve(app, host='0.0.0.0', port='5000')
 
 
 if __name__ == '__main__':
